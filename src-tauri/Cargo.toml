@@ -1,6 +1,6 @@
 [package]
 name = "dockyard"
-version = "0.4.1"
+version = "0.7.1"
 description = "Beautifull, Fast & Simple Docker Client"
 authors = ["ropali"]
 edition = "2021"
