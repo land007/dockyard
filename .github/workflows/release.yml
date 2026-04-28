@@ -22,9 +22,8 @@ jobs:
             args: '--target x86_64-apple-darwin'
           - platform: 'ubuntu-22.04' # for Intel Linux (x86_64).
             args: '--target x86_64-unknown-linux-gnu'
-          - platform: 'ubuntu-22.04' # for ARM64 Linux (cross-compile via QEMU).
-            args: '--target aarch64-unknown-linux-gnu'
-            use_qemu: true
+          - platform: 'ubuntu-24.04-arm64' # for ARM64 Linux.
+            args: ''
           - platform: 'windows-latest'
             args: ''
 
@@ -43,40 +42,11 @@ jobs:
         with:
           targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || startsWith(matrix.platform, 'ubuntu') && 'x86_64-unknown-linux-gnu,aarch64-unknown-linux-gnu' || '' }}
 
-      - name: install QEMU for ARM64 cross-compilation
-        if: matrix.use_qemu
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y qemu-user-static binfmt-support
-          sudo update-binfmts --enable
-
-      - name: configure cross-compilation for ARM64
-        if: matrix.use_qemu
-        run: |
-          echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
-          echo "CC_aarch64_unknown_linux_gcc=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
-          echo "CXX_aarch64_unknown_linux_gcc=aarch64-linux-gnu-g++" >> $GITHUB_ENV
-          echo "PKG_CONFIG_ALLOW_CROSS=1" >> $GITHUB_ENV
-          echo "PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig" >> $GITHUB_ENV
-          echo "PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig" >> $GITHUB_ENV
-
       - name: install dependencies (ubuntu only)
         if: startsWith(matrix.platform, 'ubuntu')
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev librsvg2-dev patchelf libayatana-appindicator3-dev libsoup-3.0-dev
-
-      - name: install ARM64 cross-compilation dependencies
-        if: matrix.use_qemu
-        run: |
-          sudo apt-get install -y \
-            gcc-aarch64-linux-gnu g++-aarch64-linux-gnu \
-            libwebkit2gtk-4.1-dev:arm64 librsvg2-dev:arm64 \
-            libayatana-appindicator3-dev:arm64 libsoup-3.0-dev:arm64 \
-            pkg-config:aarch64-linux-gnu
-          # Create symlinks for pkg-config
-          sudo mkdir -p /usr/lib/aarch64-linux-gnu/pkgconfig
-          sudo ln -sf /usr/lib/aarch64-linux-gnu/pkgconfig/*.pc /usr/share/pkgconfig/ 2>/dev/null || true
 
       - name: install frontend dependencies
         run: yarn install
