@@ -22,8 +22,8 @@ jobs:
             args: '--target x86_64-apple-darwin'
           - platform: 'ubuntu-22.04' # for Intel Linux (x86_64).
             args: '--target x86_64-unknown-linux-gnu'
-          - platform: 'ubuntu-24.04' # for ARM64 Linux (aarch64).
-            args: '--target aarch64-unknown-linux-gnu'
+          - platform: 'ubuntu-24.04' # for ARM64 Linux (native build, no cross-compile).
+            args: ''
           - platform: 'windows-latest'
             args: ''
 
