@@ -22,7 +22,7 @@ jobs:
             args: '--target x86_64-apple-darwin'
           - platform: 'ubuntu-22.04' # for Intel Linux (x86_64).
             args: '--target x86_64-unknown-linux-gnu'
-          - platform: 'ubuntu-24.04' # for ARM64 Linux (aarch64).
+          - platform: 'ubuntu-24.04-arm' # for ARM64 Linux (aarch64), GitHub free runner for public repos.
             args: ''
           - platform: 'windows-latest'
             args: ''
@@ -40,7 +40,7 @@ jobs:
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || matrix.platform == 'ubuntu-22.04' && 'x86_64-unknown-linux-gnu' || matrix.platform == 'ubuntu-24.04' && 'aarch64-unknown-linux-gnu' || '' }}
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || matrix.platform == 'ubuntu-22.04' && 'x86_64-unknown-linux-gnu' || matrix.platform == 'ubuntu-24.04-arm' && 'aarch64-unknown-linux-gnu' || '' }}
 
       - name: install dependencies (ubuntu only)
         if: startsWith(matrix.platform, 'ubuntu')
