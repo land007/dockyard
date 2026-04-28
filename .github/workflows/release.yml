@@ -32,6 +32,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: verify tauri.conf.json version matches tag
+        if: github.ref_type == 'tag'
+        shell: bash
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          CONF_VERSION=$(grep -oE '"version"[[:space:]]*:[[:space:]]*"[^"]+"' src-tauri/tauri.conf.json | head -1 | sed -E 's/.*"([^"]+)"$/\1/')
+          echo "tag        -> $GITHUB_REF_NAME (version $TAG_VERSION)"
+          echo "tauri.conf -> $CONF_VERSION"
+          if [ "$TAG_VERSION" != "$CONF_VERSION" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME implies version $TAG_VERSION but src-tauri/tauri.conf.json is $CONF_VERSION."
+            echo "::error::Bump version in src-tauri/tauri.conf.json, src-tauri/Cargo.toml, src-tauri/Cargo.lock to $TAG_VERSION, push, then re-tag."
+            exit 1
+          fi
+
       - name: setup node
         uses: actions/setup-node@v4
         with:
@@ -64,10 +78,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: v__VERSION__
-          releaseName: 'App v__VERSION__'
+          tagName: ${{ github.ref_name }}
+          releaseName: 'App ${{ github.ref_name }}'
           releaseBody: ${{ env.RELEASE_BODY }} # Use the changelog content as the release body
-          releaseId: ${{github.ref_name}}
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}
